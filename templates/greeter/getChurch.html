@@ -1,0 +1,34 @@
+{% extends 'greeter/base.html'%}
+
+{% load static %} <!-- New line -->
+
+{% block body_block%}
+<div class="hero-unit">
+    {% if churchGoers %}
+    <ul>
+        <table style="width:100%">
+          <tr>
+            <th>Name</th>
+            <th>Occupation</th> 
+            <th>birthdate</th>
+            <th>Picture</th>
+          </tr>
+        {% for goer in churchGoers %}
+            <tr>
+                <td>{{ goer.first_name}} {{goer.last_name}} </td>
+            <td>{{goer.occupation}} </td>
+            <td>{{goer.birthdate}} </td>
+            {% if goer.picture%}
+                <td><img src={{goer.picture}} alt="Picture of Rango" /></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+    </ul>
+    {% else %}
+        <strong>No goers currently in church.</strong>
+    {% endif %}
+
+<a href="/greeter/">Home</a><br />
+</div>
+{% endblock%}
