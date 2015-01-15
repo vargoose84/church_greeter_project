@@ -12,19 +12,21 @@ def addGoer(request):
     context = RequestContext(request)
     if request.method == 'POST':
         form = churchGoerForm(request.POST)
-        
+
         if form.is_valid():
             goer = form.save()
+            for g in greeterID.objects.all():
+                greeterRecord.objects.get_or_create(churchGoer=goer, trainerid=g)
         else:
             print form.errors
     else:
         form = churchGoerForm()
     return render_to_response('greeter/add_goer.html', {'form':form}, context)
 
-            
-            
 
-    
+
+
+
 def getChurch(request):
     context = RequestContext(request)
     churchGoer_list = churchGoer.objects.all()
@@ -91,7 +93,7 @@ def register(request):
             'greeter/register.html',
             {'user_form': user_form, 'profile_form': profile_form, 'registered': registered},
             context)
-            
+
 @login_required
 def user_logout(request):
     # Since we know the user is logged in, we can now just log them out.
