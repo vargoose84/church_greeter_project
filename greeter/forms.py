@@ -1,10 +1,11 @@
 from django import forms
 from django.contrib.auth.models import User
-from greeter.models import churchGoer, greeterID
+from greeter.models import churchGoer, greeterID, greeterRecord
 
 class churchGoerForm(forms.ModelForm):
     class Meta:
         model = churchGoer
+
 # class CategoryForm(forms.ModelForm):
     # name = forms.CharField(max_length=128, help_text="Please enter the category name.")
     # views = forms.IntegerField(widget=forms.HiddenInput(), initial=0)
@@ -51,3 +52,8 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = greeterID
         fields = ('churchGoer',)
+class greeterRecordForm(forms.ModelForm):
+    class Meta:
+        model = greeterRecord
+        fields = ('flag',)
+        

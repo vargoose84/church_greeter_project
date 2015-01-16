@@ -1,5 +1,3 @@
-activate_this = '/home/vargoose84/.virtualenvs/django15/bin/activate_this.py'
-execfile(activate_this, dict(__file__=activate_this))
 
 """
 WSGI config for church_greeter_project project.

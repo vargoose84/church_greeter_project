@@ -5,6 +5,9 @@ from django.contrib.auth import authenticate, login, logout
 from greeter.models import churchGoer, greeterID, greeterRecord
 from django.contrib.auth.decorators import login_required
 from greeter.forms import UserForm, UserProfileForm, churchGoerForm
+def getGoers(request):
+    context = RequestContext(request)
+    
 def index(request):
     context = RequestContext(request)
     return render_to_response('greeter/index.html',{}, context)
@@ -23,7 +26,12 @@ def addGoer(request):
         form = churchGoerForm()
     return render_to_response('greeter/add_goer.html', {'form':form}, context)
 
-
+def getBio(request):
+    context = RequestContext(request)
+    print request.GET.get('name')
+    c = churchGoer(id=request.GET.get('name'))
+    return render_to_response('greeter/bio.html',{'churchGoer' : c}, context)
+    
 
 
 
