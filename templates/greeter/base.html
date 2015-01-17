@@ -12,7 +12,7 @@
 </head>
 
     <body>
- 
+
         <div class="navbar navbar-inverse navbar-fixed-top">
            <div class="navbar-inner">
                <div class="container">
@@ -41,20 +41,32 @@
                            <li><a href="/greeter/">Home Page</a><br /></li>
                            <li><a href="/greeter/about/">About</a></li>
                        </ul>
-                       
+
                    </div>
                    <!--/.nav-collapse -->
                </div>
            </div>
         </div>
-        
+
         <div class="container-fluid">
             <div class="row-fluid">
                 <div class="span3">
                     <div class="well sidebar-nav">
-                       
-                    {% block side_block %}
-                    {% endblock %}
+
+                    {%block side_block%}
+                    <div class="hero-unit">
+                        <h2>Church Goers</h2>
+                        {% if churchGoers %}
+                            {% for goer in churchGoers %}
+                                {% if user.is_authenticated %}
+                                    <a href="/greeter/getChurch/{{goer.id}}">{{goer}}</a>
+                                {%else%}
+                                    {{goer}}
+                                {%endif %}<br/>
+                            {% endfor %}
+                        {% endif %}
+                     </div>
+                    {%endblock%}
 
                     </div>
                     <!--/.well -->
@@ -73,11 +85,11 @@
         <hr>
         <footer>
             <div class="container">
-                <p>&copy; Rango: How to Tango with Django 2013</p>
+                <p>&copy; Church Greeter App: Sam Varghese</p>
             </div>
         </footer>
 
-            
+
     <script src="{% static 'js/jquery-2.0.3.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
 </body>

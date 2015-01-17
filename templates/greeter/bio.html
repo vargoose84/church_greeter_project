@@ -3,8 +3,16 @@
 
  {%block body_block%}
  <div class="hero-unit">
-        <h1>{{ churchGoer}}</h1>
-        
+        <h1>{{ goer}}</h1>
+        {% if goer.picture %}
+            <img src={{goer.picture}} alt="Profile Picture" /><br/>
+            {% endif%}
+        Birthday: {{goer.birthdate}}<br/>
+        Gender: {{goer.gender}}<br/>
+        Sons: {{sons}}<br/>
+
+
+
         <form id="greeterRecordForm" method="post" action="/greeter/greeterRecord/">
             {% csrf_token %}
             {% if user.is_authenticated %}

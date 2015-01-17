@@ -5,12 +5,12 @@ from django.contrib.auth import authenticate, login, logout
 from greeter.models import churchGoer, greeterID, greeterRecord
 from django.contrib.auth.decorators import login_required
 from greeter.forms import UserForm, UserProfileForm, churchGoerForm
-def getGoers(request):
-    context = RequestContext(request)
-    
+
 def index(request):
     context = RequestContext(request)
-    return render_to_response('greeter/index.html',{}, context)
+    churchGoer_list = churchGoer.objects.all()
+    context_dict = {'churchGoers' : churchGoer_list}
+    return render_to_response('greeter/index.html',context_dict, context)
 def addGoer(request):
     context = RequestContext(request)
     if request.method == 'POST':
@@ -20,18 +20,23 @@ def addGoer(request):
             goer = form.save()
             for g in greeterID.objects.all():
                 greeterRecord.objects.get_or_create(churchGoer=goer, trainerid=g)
+            for s in goer.sons.objects.all():
+                s.
         else:
             print form.errors
     else:
         form = churchGoerForm()
     return render_to_response('greeter/add_goer.html', {'form':form}, context)
 
-def getBio(request):
+def getBio(request, goerID):
+
     context = RequestContext(request)
-    print request.GET.get('name')
-    c = churchGoer(id=request.GET.get('name'))
-    return render_to_response('greeter/bio.html',{'churchGoer' : c}, context)
-    
+    churchGoer_list = churchGoer.objects.all()
+    c = churchGoer.objects.get(pk=goerID)
+    sons = c.sons.all()
+    context_dict = {'churchGoers' : churchGoer_list, 'goer' : c, 'sons' : sons}
+    return render_to_response('greeter/bio.html',context_dict, context)
+
 
 
 
