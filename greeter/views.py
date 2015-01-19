@@ -7,19 +7,24 @@ from django.contrib.auth.decorators import login_required
 from greeter.forms import UserForm, UserProfileForm, churchGoerForm
 
 def index(request):
-    context = RequestContext(request)
-    churchGoer_list = churchGoerListCreator(type=request.session['listType'], goerID = request.user.pk)
+    context = RequestContext(request)        
+    churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
     context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/index.html',context_dict, context)
 
 @login_required
 def addGoer(request):
     context = RequestContext(request)
+    
+    print request.FILES
     if request.method == 'POST':
-        form = churchGoerForm(request.POST)
-
+        form = churchGoerForm(request.POST, request.FILES)
         if form.is_valid():
+            
             goer = form.save()
+            print request.FILES
+            for t in greeterID.objects.all():
+                greeterRecord.objects.get_or_create(churchGoer=goer, trainerID=t)
             for s in goer.sons.all():
                 s.parents.add(goer)
                 s.save()
@@ -33,12 +38,13 @@ def addGoer(request):
                 sibling.siblings.add(goer)
                 sibling.save()
             c = form.save()
+            churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
+            context_dict = {'churchGoers' : churchGoer_list, 'goer' : c}
+            return render_to_response('greeter/bio.html',context_dict, context)
                 
         else:
             print form.errors
-        churchGoer_list = churchGoerListCreator(type=request.session['listType'], goerID = request.user.pk)
-        context_dict = {'churchGoers' : churchGoer_list, 'goer' : c}
-        return render_to_response('greeter/bio.html',context_dict, context)
+
     else:
         form = churchGoerForm()
     return render_to_response('greeter/add_goer.html', {'form':form}, context)
@@ -46,8 +52,9 @@ def addGoer(request):
 def modifyGoer(request,goerID):
     context = RequestContext(request)
     goer = churchGoer.objects.get(pk=goerID)
+    print request.FILES
     if request.method == 'POST':
-        modifyForm = churchGoerForm(data=request.POST, instance=c)
+        form = churchGoerForm(request.POST, request.FILES)
         for s in goer.sons.all():
             s.parents.add(goer)
             s.save()
@@ -65,22 +72,21 @@ def modifyGoer(request,goerID):
             modifyForm.save()
         else:
             print churchGoerForm.errors
-        churchGoer_list = churchGoerListCreator(type=request.session['listType'], goerID = request.user.pk)
+        churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
         context_dict = {'churchGoers' : churchGoer_list, 'goer' : c}
         return render_to_response('greeter/bio.html',context_dict, context)
     else: 
         modifyForm = churchGoerForm(instance=goer)
-        churchGoer_list = churchGoerListCreator(type=request.session['listType'], goerID = request.user.pk)
+        churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
     return render_to_response(
             'greeter/add_Goer.html',
             {'form': modifyForm, 'goer' : goer},
             context)
-        
-def getBio(request, goerID):
 
+def getBio(request, goerID):
     context = RequestContext(request)
     c = churchGoer.objects.get(pk=goerID)
-    churchGoer_list = churchGoerListCreator(type=request.session['listType'], goerID = request.user.pk)
+    churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
     sons = c.sons.all()
     daughters = c.daughters.all()
     parents = c.parents.all()
@@ -92,7 +98,7 @@ def getBio(request, goerID):
 
 
 
-def getChurch(request,  listType):
+def getChurch(request,  listType='all'):
     context = RequestContext(request)
     request.session['listType']=listType
     print request.user, listType

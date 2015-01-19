@@ -5,9 +5,9 @@
  <div class="hero-unit">
         <h1>Add a person</h1>
         {% if goer %}
-        <form id="churchGoerForm" method="post" action="/greeter/modifyGoer/{{goer.id}}/">
+        <form id="churchGoerForm" method="post" action="/greeter/modifyGoer/{{goer.id}}/" enctype="multipart/form-data" >
         {% else %}
-        <form id="churchGoerForm" method="post" action="/greeter/addGoer/">
+        <form id="churchGoerForm" method="post" action="/greeter/addGoer/" enctype="multipart/form-data" >
         {% endif%}
             {% csrf_token %}
             {% for hidden in form.hidden_fields %}
