@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login, logout
@@ -8,9 +8,11 @@ from greeter.forms import UserForm, UserProfileForm, churchGoerForm
 
 def index(request):
     context = RequestContext(request)
-    churchGoer_list = churchGoer.objects.all()
+    churchGoer_list = churchGoerListCreator(type=request.session['listType'], goerID = request.user.pk)
     context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/index.html',context_dict, context)
+
+@login_required
 def addGoer(request):
     context = RequestContext(request)
     if request.method == 'POST':
@@ -18,31 +20,84 @@ def addGoer(request):
 
         if form.is_valid():
             goer = form.save()
-            for g in greeterID.objects.all():
-                greeterRecord.objects.get_or_create(churchGoer=goer, trainerid=g)
-            for s in goer.sons.objects.all():
-                s.
+            for s in goer.sons.all():
+                s.parents.add(goer)
+                s.save()
+            for d in goer.daughters.all():
+                d.parents.add(goer)
+                d.save()
+            for spouse in goer.spouse.all():
+                spouse.spouse.add(goer)
+                spouse.save()
+            for sibling in goer.siblings.all():
+                sibling.siblings.add(goer)
+                sibling.save()
+            c = form.save()
+                
         else:
             print form.errors
+        churchGoer_list = churchGoerListCreator(type=request.session['listType'], goerID = request.user.pk)
+        context_dict = {'churchGoers' : churchGoer_list, 'goer' : c}
+        return render_to_response('greeter/bio.html',context_dict, context)
     else:
         form = churchGoerForm()
     return render_to_response('greeter/add_goer.html', {'form':form}, context)
-
+@login_required
+def modifyGoer(request,goerID):
+    context = RequestContext(request)
+    goer = churchGoer.objects.get(pk=goerID)
+    if request.method == 'POST':
+        modifyForm = churchGoerForm(data=request.POST, instance=c)
+        for s in goer.sons.all():
+            s.parents.add(goer)
+            s.save()
+        for d in goer.daughters.all():
+            d.parents.add(goer)
+            d.save()
+        for spouse in goer.spouse.all():
+            spouse.spouse.add(goer)
+            spouse.save()
+        for sibling in goer.siblings.all():
+            sibling.siblings.add(goer)
+            sibling.save()
+        c = form.save()
+        if  modifyForm.is_valid():
+            modifyForm.save()
+        else:
+            print churchGoerForm.errors
+        churchGoer_list = churchGoerListCreator(type=request.session['listType'], goerID = request.user.pk)
+        context_dict = {'churchGoers' : churchGoer_list, 'goer' : c}
+        return render_to_response('greeter/bio.html',context_dict, context)
+    else: 
+        modifyForm = churchGoerForm(instance=goer)
+        churchGoer_list = churchGoerListCreator(type=request.session['listType'], goerID = request.user.pk)
+    return render_to_response(
+            'greeter/add_Goer.html',
+            {'form': modifyForm, 'goer' : goer},
+            context)
+        
 def getBio(request, goerID):
 
     context = RequestContext(request)
-    churchGoer_list = churchGoer.objects.all()
     c = churchGoer.objects.get(pk=goerID)
+    churchGoer_list = churchGoerListCreator(type=request.session['listType'], goerID = request.user.pk)
     sons = c.sons.all()
-    context_dict = {'churchGoers' : churchGoer_list, 'goer' : c, 'sons' : sons}
+    daughters = c.daughters.all()
+    parents = c.parents.all()
+    siblings = c.siblings.all()
+    
+    context_dict = {'churchGoers' : churchGoer_list, 'goer' : c, 'sons' : sons, 'daughters' : daughters, 'parents' : parents, 'siblings' : siblings}
     return render_to_response('greeter/bio.html',context_dict, context)
 
 
 
 
-def getChurch(request):
+def getChurch(request,  listType):
     context = RequestContext(request)
-    churchGoer_list = churchGoer.objects.all()
+    request.session['listType']=listType
+    print request.user, listType
+    curUser = greeterID.objects.get(id = request.user.id)
+    churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = curUser)
     context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/getChurch.html', context_dict, context)
 
@@ -85,7 +140,7 @@ def register(request):
             # Now we save the UserProfile model instance.
             profile.save()
             for c in churchGoer.objects.all():
-                greeterRecord.objects.get_or_create(churchGoer=c, trainerid=profile)
+                greeterRecord.objects.get_or_create(churchGoer=c, trainerID=profile)
             # Update our variable to tell the template registration was successful.
             registered = True
 
@@ -115,6 +170,7 @@ def user_logout(request):
     # Take the user back to the homepage.
     return HttpResponseRedirect('/greeter/')
 
+
 def user_login(request):
     # Like before, obtain the context for the user's request.
     context = RequestContext(request)
@@ -125,7 +181,7 @@ def user_login(request):
         # This information is obtained from the login form.
         username = request.POST['username']
         password = request.POST['password']
-
+        request.session['listType'] = 'unlearned'
         # Use Django's machinery to attempt to see if the username/password
         # combination is valid - a User object is returned if it is.
         user = authenticate(username=username, password=password)
@@ -156,3 +212,30 @@ def user_login(request):
         # No context variables to pass to the template system, hence the
         # blank dictionary object...
         return render_to_response('greeter/login.html', {}, context)
+
+def churchGoerListCreator(type, goerID=None):
+    churchGoer_list=[]  
+    if type == 'learned':
+        for record in greeterRecord.objects.filter(trainerID=goerID, flag=True):
+            churchGoer_list.append(record.churchGoer)
+        
+    elif type == 'unlearned':
+        for record in greeterRecord.objects.filter(trainerID=goerID, flag=False):
+            churchGoer_list.append(record.churchGoer)
+    else:
+        churchGoer_list = churchGoer.objects.all()
+    return churchGoer_list
+def greeterRecordChange(request, goerID):
+    context = RequestContext(request)
+    
+    curTrainerID=greeterID.objects.get(id = request.user.id)
+    goer = churchGoer.objects.get(pk=goerID)
+    currentRecord = greeterRecord.objects.get(trainerID=curTrainerID, churchGoer=goer)
+    currentRecord.flag = True
+    currentRecord.save()
+    curUser = greeterID.objects.get(id = request.user.id)
+    churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = curUser)
+    context_dict = {'churchGoers' : churchGoer_list}
+    return render_to_response('greeter/getChurch.html', context_dict, context)
+    
+    

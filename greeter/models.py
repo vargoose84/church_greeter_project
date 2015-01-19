@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class greeterRecord(models.Model):
-    trainerid = models.ForeignKey('greeterID')
+    trainerID = models.ForeignKey('greeterID')
     churchGoer = models.ForeignKey('churchGoer')
     flag = models.BooleanField(default=False)
     
@@ -13,6 +13,7 @@ class churchGoer(models.Model):
     first_name = models.CharField(max_length=128)
     gender = models.CharField(max_length=128, choices=gender_choices, default="Male")
     sons = models.ManyToManyField("self", blank =True)
+    parents = models.ManyToManyField("self", blank =True)
     daughters = models.ManyToManyField("self", blank =True)
     spouse = models.ManyToManyField("self", blank =True)
     siblings = models.ManyToManyField("self", blank =True)

@@ -2,10 +2,10 @@
 {%block body_block%}
 <div class="hero-unit">
         {% if registered %}
-        Rango says: <strong>thank you for registering!</strong>
-        <a href="/rango/">Return to the homepage.</a><br />
+        <strong>thank you for registering!</strong>
+        <a href="/greeter/">Return to the homepage.</a><br />
         {% else %}
-        Rango says: <strong>register here!</strong><br />
+        <strong>register here!</strong><br />
 
         <form id="user_form" method="post" action="/greeter/register/"
                 enctype="multipart/form-data">

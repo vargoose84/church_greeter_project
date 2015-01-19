@@ -5,13 +5,13 @@ def populate():
     print "Created BobVila"
     b = add_greeter(un="vila", gid=a)
     print "made him a greeter"
-    a= add_churchGoer(fn="Larry", ln="Bird", bd="2015-05-15")
+    a= add_churchGoer(fn="Ashley", ln="Ashira", bd="2015-05-15",pic='media/profile_images/AshleyAshira.jpg')
     b = add_greeter(un="LarryB", gid=a)
-    add_churchGoer(fn="Bob", ln="vila", bd="2015-05-15")
-    add_churchGoer(fn="Trisha", ln="Peterson", bd="2015-05-15")
-    add_churchGoer(fn="Mike", ln="Costanza", bd="2015-05-15")
-    add_churchGoer(fn="Elliott", ln="Erickson", bd="2015-05-15")
-    a=add_churchGoer(fn="Bob", ln="Hagie", bd="2015-05-15")
+    add_churchGoer(fn="Jenna", ln="Smith", bd="2015-05-15",pic='media/profile_images/rango.jpg')
+    add_churchGoer(fn="Trisha", ln="Peterson", bd="2015-05-15",pic='media/profile_images/TrishaPeterson.jpg')
+    add_churchGoer(fn="Varghese", ln="Varghese", bd="2015-05-15",pic='media/profile_images/VargheseVarghese.jpg')
+    add_churchGoer(fn="Derek", ln="Weller", bd="2015-05-15",pic='media/profile_images/DerekWeller.jpg')
+    a=add_churchGoer(fn="Bob", ln="Hagie", bd="2015-05-15",pic='media/profile_images/BobHagie.jpg')
     b = add_greeter(un="BobH", gid=a)
 
 def add_churchGoer(fn,ln,bd,pic=None):
@@ -32,14 +32,14 @@ def add_greeter(un,gid,pw="ooblec"):
         return g
 def populateList(greeter):
     for c in churchGoer.objects.all():
-        greeterRecord.objects.get_or_create(churchGoer=c, trainerid=greeter)
+        greeterRecord.objects.get_or_create(churchGoer=c, trainerID=greeter)
 
         
         
     
 def populateGreeter(churchGoer):
     for g in greeterID.objects.all():
-        greeterRecord.objects.get_or_create(churchGoer=churchGoer, trainerid=g)
+        greeterRecord.objects.get_or_create(churchGoer=churchGoer, trainerID=g)
         
         
 if __name__ == '__main__':

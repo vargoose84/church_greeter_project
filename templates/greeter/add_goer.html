@@ -1,18 +1,20 @@
 {% extends 'greeter/base.html' %}
-{% block title %} Rango {%endblock%}
+{% block title %} Greeter App {%endblock%}
 
  {%block body_block%}
  <div class="hero-unit">
         <h1>Add a person</h1>
+        {% if goer %}
+        <form id="churchGoerForm" method="post" action="/greeter/modifyGoer/{{goer.id}}/">
+        {% else %}
         <form id="churchGoerForm" method="post" action="/greeter/addGoer/">
-
+        {% endif%}
             {% csrf_token %}
             {% for hidden in form.hidden_fields %}
                 {{ hidden }}
             {% endfor %}
 
             {% for field in form.visible_fields %}
-
 
                 {{field.label}}: {{ field }}
                 {{ field.help_text }}

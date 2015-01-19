@@ -17,7 +17,7 @@
             <tr>
                 <td>
                     {% if user.is_authenticated %}
-                        <a href="/greeter/bio.html">{{ goer.first_name}} {{goer.last_name}}</a>
+                        <a href="/greeter/getChurch/{{goer.id}}">{{goer}}</a>
                     {%else%}
                         {{ goer.first_name}} {{goer.last_name}}
                     {%endif %}<br/>

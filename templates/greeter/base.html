@@ -8,7 +8,7 @@
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
     <link href="{% static 'css/bootstrap-responsive.css' %}" rel="stylesheet">
 
-    <title>Rango - {% block title %}Django Greeter App!{% endblock %}</title>
+    <title>Django - {% block title %}Greeter App!{% endblock %}</title>
 </head>
 
     <body>
@@ -21,7 +21,7 @@
                        <span class="icon-bar"></span>
                        <span class="icon-bar"></span>
                    </button>
-                   <a class="brand" href="/greeter/">Rango</a>
+                   <a class="brand" href="/greeter/">Greeter App</a>
 
                    <div class="nav-collapse collapse">
                        <ul class="nav pull-right">
@@ -54,8 +54,9 @@
                     <div class="well sidebar-nav">
 
                     {%block side_block%}
+                    <h2>Church Goers</h2>
                     <div class="hero-unit">
-                        <h2>Church Goers</h2>
+                        
                         {% if churchGoers %}
                             {% for goer in churchGoers %}
                                 {% if user.is_authenticated %}
@@ -66,8 +67,11 @@
                             {% endfor %}
                         {% endif %}
                      </div>
+                     Testing123
                     {%endblock%}
-
+                    {% if user.is_authenticated %}
+                    <a href={% url "getChurchAll" %}>All</a> | <a href={% url "getChurchUnlearned" %}>unlearned</a> | <a href={% url "getChurchLearned" %}>Learned</a>
+                    {% endif %}
                     </div>
                     <!--/.well -->
                 </div>
