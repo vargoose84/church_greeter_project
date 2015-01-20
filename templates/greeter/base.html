@@ -35,7 +35,6 @@
                        </ul>
                        <ul class="nav">
                            {% if user.is_authenticated %}
-                            <li><a href="/greeter/restricted/">Restricted</a></li>
                             <li><a href="/greeter/addGoer/">Add ChurchGoer</a></li>
                            {% endif %}
                            <li><a href="/greeter/">Home Page</a><br /></li>
@@ -69,7 +68,7 @@
                      </div>
                     {%endblock%}
                     {% if user.is_authenticated %}
-                    <a href={% url "getChurchAll" %}>All</a> | <a href={% url "getChurchUnlearned" %}>unlearned</a> | <a href={% url "getChurchLearned" %}>Learned</a>
+                    <a href={% url "getChurchAll" %}>All</a> | <a href={% url "getChurchUnlearned" %}>unlearned</a> | <a href={% url "getChurchLearned" %}>Learned</a> | <a href={% url "getChurchReset" %}>Reset All</a> 
                     {% endif %}
                     </div>
                     <!--/.well -->

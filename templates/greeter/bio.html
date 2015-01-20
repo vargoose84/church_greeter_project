@@ -5,22 +5,23 @@
  <div class="hero-unit">
         <h1>{{ goer}}</h1>
         {% if goer.picture %}
-            <img src={{goer.picture}} alt="Profile Picture" /><br/>
+        
+            <img src="{{ MEDIA_URL}}{{goer.picture}}" alt="Profile Picture" /><br/>
             {% endif%}
         Birthday: {{goer.birthdate}}<br/>
         Gender: {{goer.gender}}<br/>
         Sons: {% for son in goer.sons.all %}
-            {{son}} <img src={{son.picture}} alt="Picture of: {{son}}" /><br/>
-                {% endfor %}
+            {{son}} {% if son.picture %}<img src="{{ MEDIA_URL}}{{son.picture}}" alt="Picture of: {{son}}" />{% endif%}<br/>
+                {% endfor %}<br/>
         Daughters: {% for daughter in goer.daughters.all %}
-            {{son}} <img src={{daughter.picture}} alt="Picture of: {{daughter}}" /><br/>
-                {% endfor %}
+            {{daughter}} {% if daughter.picture %}<img src="{{ MEDIA_URL}}{{daughter.picture}}" alt="Picture of: {{daughter}}" />{% endif%}<br/>
+                {% endfor %}<br/>
         Siblings: {% for sibling in goer.siblings.all %}
-            {{son}} <img src={{sibling.picture}} alt="Picture of: {{sibling}}" /><br/>
-                {% endfor %}
+            {{sibling}} {% if sibling.picture %}<img src="{{ MEDIA_URL}}{{sibling.picture}}" alt="Picture of: {{sibling}}" />{% endif%}<br/>
+                {% endfor %}<br/>
         Parents: {% for parent in goer.parents.all %}
-            {{parent}} <img src={{parent.picture}} alt="Picture of: {{parent}}" /><br/>
-                {% endfor %}
+            {{parent}} {% if parent.picture %}<img src="{{ MEDIA_URL}}{{parent.picture}}" alt="Picture of: {{parent}}" />{% endif%}<br/>
+                {% endfor %}<br/>
 
 
 

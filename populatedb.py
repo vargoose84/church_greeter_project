@@ -1,17 +1,17 @@
 import os
 
 def populate():
-    a = add_churchGoer(fn="bob", ln="vila", bd="2015-05-15", pic='media/profile_images/rango.jpg')
+    a = add_churchGoer(fn="bob", ln="vila", bd="2015-05-15", pic='profile_images/rango.jpg')
     print "Created BobVila"
     b = add_greeter(un="vila", gid=a)
     print "made him a greeter"
-    a= add_churchGoer(fn="Ashley", ln="Ashira", bd="2015-05-15",pic='media/profile_images/AshleyAshira.jpg')
+    a= add_churchGoer(fn="Ashley", ln="Ashira", bd="2015-05-15",pic='profile_images/AshleyAshira.jpg')
     b = add_greeter(un="LarryB", gid=a)
-    add_churchGoer(fn="Jenna", ln="Smith", bd="2015-05-15",pic='media/profile_images/rango.jpg')
-    add_churchGoer(fn="Trisha", ln="Peterson", bd="2015-05-15",pic='media/profile_images/TrishaPeterson.jpg')
-    add_churchGoer(fn="Varghese", ln="Varghese", bd="2015-05-15",pic='media/profile_images/VargheseVarghese.jpg')
-    add_churchGoer(fn="Derek", ln="Weller", bd="2015-05-15",pic='media/profile_images/DerekWeller.jpg')
-    a=add_churchGoer(fn="Bob", ln="Hagie", bd="2015-05-15",pic='media/profile_images/BobHagie.jpg')
+    add_churchGoer(fn="Jenna", ln="Smith", bd="2015-05-15",pic='profile_images/rango.jpg')
+    add_churchGoer(fn="Trisha", ln="Peterson", bd="2015-05-15",pic='profile_images/TrishaPeterson.jpg')
+    add_churchGoer(fn="Varghese", ln="Varghese", bd="2015-05-15",pic='profile_images/VargheseVarghese.jpg')
+    add_churchGoer(fn="Derek", ln="Weller", bd="2015-05-15",pic='profile_images/DerekWeller.jpg')
+    a=add_churchGoer(fn="Bob", ln="Hagie", bd="2015-05-15",pic='profile_images/BobHagie.jpg')
     b = add_greeter(un="BobH", gid=a)
 
 def add_churchGoer(fn,ln,bd,pic=None):

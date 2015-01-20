@@ -39,7 +39,7 @@ def addGoer(request):
                 sibling.save()
             c = form.save()
             churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
-            context_dict = {'churchGoers' : churchGoer_list, 'goer' : c}
+            context_dict = {'churchGoers' : churchGoer_list, 'goer' : c, 'add' : True}
             return render_to_response('greeter/bio.html',context_dict, context)
                 
         else:
@@ -55,6 +55,23 @@ def modifyGoer(request,goerID):
     print request.FILES
     if request.method == 'POST':
         form = churchGoerForm(request.POST, request.FILES)
+        goer = form.save()
+        for o in  churchGoer.objects.filter(parents=goer):
+            o.parents.remove(goer)
+            o.save()
+        for o in  churchGoer.objects.filter(sons = goer):
+            o.sons.remove(goer)
+            o.save()
+        for o in  churchGoer.objects.filter(daughters = goer ):
+            o.daughters.remove(goer) 
+            o.save()            
+        for o in  churchGoer.objects.filter(siblings = goer):
+            o.siblings.remove(goer)
+            o.save()
+        for o in  churchGoer.objects.filter(spouse = goer):
+            o.spouse.remove(goer)
+            o.save()
+            
         for s in goer.sons.all():
             s.parents.add(goer)
             s.save()
@@ -67,20 +84,21 @@ def modifyGoer(request,goerID):
         for sibling in goer.siblings.all():
             sibling.siblings.add(goer)
             sibling.save()
-        c = form.save()
-        if  modifyForm.is_valid():
-            modifyForm.save()
+        
+        if  form.is_valid():
+            c = form.save()
+            churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
+            context_dict = {'churchGoers' : churchGoer_list, 'goer' : c}
+            return render_to_response('greeter/bio.html',context_dict, context)
         else:
             print churchGoerForm.errors
-        churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
-        context_dict = {'churchGoers' : churchGoer_list, 'goer' : c}
-        return render_to_response('greeter/bio.html',context_dict, context)
+
     else: 
-        modifyForm = churchGoerForm(instance=goer)
+        form = churchGoerForm(instance=goer)
         churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
     return render_to_response(
             'greeter/add_Goer.html',
-            {'form': modifyForm, 'goer' : goer},
+            {'form': form, 'goer' : goer},
             context)
 
 def getBio(request, goerID):
@@ -102,9 +120,11 @@ def getChurch(request,  listType='all'):
     context = RequestContext(request)
     request.session['listType']=listType
     print request.user, listType
-    curUser = greeterID.objects.get(id = request.user.id)
-    churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = curUser)
-    context_dict = {'churchGoers' : churchGoer_list}
+    context_dict = []
+    if request.user.is_authenticated():
+        curUser = greeterID.objects.get(id = request.user.id)
+        churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = curUser)
+        context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/getChurch.html', context_dict, context)
 
 def register(request):
@@ -228,6 +248,12 @@ def churchGoerListCreator(type, goerID=None):
     elif type == 'unlearned':
         for record in greeterRecord.objects.filter(trainerID=goerID, flag=False):
             churchGoer_list.append(record.churchGoer)
+    elif type == 'reset':
+        for record in greeterRecord.objects.filter(trainerID=goerID, flag=True):
+            record.flag = False
+            record.save()
+        
+        
     else:
         churchGoer_list = churchGoer.objects.all()
     return churchGoer_list
