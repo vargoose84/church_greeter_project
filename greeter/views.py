@@ -115,16 +115,17 @@ def getBio(request, goerID):
 
 
 
-
+    
 def getChurch(request,  listType='all'):
     context = RequestContext(request)
+    curUser=None
     request.session['listType']=listType
     print request.user, listType
     context_dict = []
     if request.user.is_authenticated():
         curUser = greeterID.objects.get(id = request.user.id)
-        churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = curUser)
-        context_dict = {'churchGoers' : churchGoer_list}
+    churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = curUser)
+    context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/getChurch.html', context_dict, context)
 
 def register(request):
@@ -252,8 +253,6 @@ def churchGoerListCreator(type, goerID=None):
         for record in greeterRecord.objects.filter(trainerID=goerID, flag=True):
             record.flag = False
             record.save()
-        
-        
     else:
         churchGoer_list = churchGoer.objects.all()
     return churchGoer_list

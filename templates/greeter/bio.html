@@ -30,7 +30,7 @@
             {% if user.is_authenticated %}
                 {{greeterRecord.churchGoer}}
             {% endif%}
-            <input type="submit" name="submit" value="Memorized" />
+            <input type="submit" name="submit" value="Memorized" /><br/>
             <a href="/greeter/modifyGoer/{{goer.pk}}/">Modify ChurchGoer</a>
         </form>
         
