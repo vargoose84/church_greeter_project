@@ -10,17 +10,18 @@
             {% endif%}
         Birthday: {{goer.birthdate}}<br/>
         Gender: {{goer.gender}}<br/>
-        Sons: {% for son in goer.sons.all %}
-            {{son}} {% if son.picture %}<img src="{{ MEDIA_URL}}{{son.picture}}" alt="Picture of: {{son}}" />{% endif%}<br/>
-                {% endfor %}<br/>
-        Daughters: {% for daughter in goer.daughters.all %}
-            {{daughter}} {% if daughter.picture %}<img src="{{ MEDIA_URL}}{{daughter.picture}}" alt="Picture of: {{daughter}}" />{% endif%}<br/>
+
+        Children: {% for child in goer.Children.all %}
+            {{child}} {% if child.picture %}<img src="{{ MEDIA_URL}}{{child.picture}}" alt="Picture of: {{child}}" />{% endif%}<br/>
                 {% endfor %}<br/>
         Siblings: {% for sibling in goer.siblings.all %}
             {{sibling}} {% if sibling.picture %}<img src="{{ MEDIA_URL}}{{sibling.picture}}" alt="Picture of: {{sibling}}" />{% endif%}<br/>
                 {% endfor %}<br/>
         Parents: {% for parent in goer.parents.all %}
             {{parent}} {% if parent.picture %}<img src="{{ MEDIA_URL}}{{parent.picture}}" alt="Picture of: {{parent}}" />{% endif%}<br/>
+                {% endfor %}<br/>
+        Spouse: {% for spouse in goer.spouse.all %}
+            {{spouse}} {% if spouse.picture %}<img src="{{ MEDIA_URL}}{{spouse.picture}}" alt="Picture of: {{spouse}}" />{% endif%}<br/>
                 {% endfor %}<br/>
 
 

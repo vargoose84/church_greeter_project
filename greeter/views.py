@@ -22,29 +22,15 @@ def addGoer(request):
         if form.is_valid():
             
             goer = form.save()
-            print request.FILES
+            
             for t in greeterID.objects.all():
-                greeterRecord.objects.get_or_create(churchGoer=goer, trainerID=t)
-            for s in goer.sons.all():
-                s.parents.add(goer)
-                s.save()
-            for d in goer.daughters.all():
-                d.parents.add(goer)
-                d.save()
-            for spouse in goer.spouse.all():
-                spouse.spouse.add(goer)
-                spouse.save()
-            for sibling in goer.siblings.all():
-                sibling.siblings.add(goer)
-                sibling.save()
-            c = form.save()
+                greeterRecord.objects.get_or_create(churchGoer=goer, trainerID=t)        
+            
             churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
-            context_dict = {'churchGoers' : churchGoer_list, 'goer' : c, 'add' : True}
+            context_dict = {'churchGoers' : churchGoer_list, 'goer' : goer, 'add' : True}
             return render_to_response('greeter/bio.html',context_dict, context)
-                
         else:
             print form.errors
-
     else:
         form = churchGoerForm()
     return render_to_response('greeter/add_goer.html', {'form':form}, context)
@@ -55,40 +41,11 @@ def modifyGoer(request,goerID):
     print request.FILES
     if request.method == 'POST':
         form = churchGoerForm(request.POST, request.FILES)
-        goer = form.save()
-        for o in  churchGoer.objects.filter(parents=goer):
-            o.parents.remove(goer)
-            o.save()
-        for o in  churchGoer.objects.filter(sons = goer):
-            o.sons.remove(goer)
-            o.save()
-        for o in  churchGoer.objects.filter(daughters = goer ):
-            o.daughters.remove(goer) 
-            o.save()            
-        for o in  churchGoer.objects.filter(siblings = goer):
-            o.siblings.remove(goer)
-            o.save()
-        for o in  churchGoer.objects.filter(spouse = goer):
-            o.spouse.remove(goer)
-            o.save()
-            
-        for s in goer.sons.all():
-            s.parents.add(goer)
-            s.save()
-        for d in goer.daughters.all():
-            d.parents.add(goer)
-            d.save()
-        for spouse in goer.spouse.all():
-            spouse.spouse.add(goer)
-            spouse.save()
-        for sibling in goer.siblings.all():
-            sibling.siblings.add(goer)
-            sibling.save()
-        
+
         if  form.is_valid():
-            c = form.save()
+            goer = form.save()
             churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
-            context_dict = {'churchGoers' : churchGoer_list, 'goer' : c}
+            context_dict = {'churchGoers' : churchGoer_list, 'goer' : goer}
             return render_to_response('greeter/bio.html',context_dict, context)
         else:
             print churchGoerForm.errors
@@ -103,14 +60,11 @@ def modifyGoer(request,goerID):
 
 def getBio(request, goerID):
     context = RequestContext(request)
-    c = churchGoer.objects.get(pk=goerID)
+    goer = churchGoer.objects.get(pk=goerID)
     churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
-    sons = c.sons.all()
-    daughters = c.daughters.all()
-    parents = c.parents.all()
-    siblings = c.siblings.all()
+
     
-    context_dict = {'churchGoers' : churchGoer_list, 'goer' : c, 'sons' : sons, 'daughters' : daughters, 'parents' : parents, 'siblings' : siblings}
+    context_dict = {'churchGoers' : churchGoer_list, 'goer' : goer}
     return render_to_response('greeter/bio.html',context_dict, context)
 
 
