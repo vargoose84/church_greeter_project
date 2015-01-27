@@ -11,7 +11,7 @@
         Birthday: {{goer.birthdate}}<br/>
         Gender: {{goer.gender}}<br/>
 
-        Children: {% for child in goer.Children.all %}
+        Children: {% for child in goer.children.all %}
             {{child}} {% if child.picture %}<img src="{{ MEDIA_URL}}{{child.picture}}" alt="Picture of: {{child}}" />{% endif%}<br/>
                 {% endfor %}<br/>
         Siblings: {% for sibling in goer.siblings.all %}

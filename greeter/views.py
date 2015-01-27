@@ -21,7 +21,10 @@ def addGoer(request):
         form = churchGoerForm(request.POST, request.FILES)
         if form.is_valid():
             
-            goer = form.save()
+            goer = form.save(commit=False)
+            # goer.save()
+            # form.save_m2m()
+            # form.save(commit=True)  
             
             for t in greeterID.objects.all():
                 greeterRecord.objects.get_or_create(churchGoer=goer, trainerID=t)        
@@ -40,10 +43,15 @@ def modifyGoer(request,goerID):
     goer = churchGoer.objects.get(pk=goerID)
     print request.FILES
     if request.method == 'POST':
-        form = churchGoerForm(request.POST, request.FILES)
+        form = churchGoerForm(request.POST, request.FILES,instance=goer)
 
         if  form.is_valid():
-            goer = form.save()
+            goer = form.save(commit=False)
+            print request.POST.getlist('parents')
+            print request.POST.getlist('children')
+            goer.save()
+            form.save_m2m()
+            form.save(commit=True)
             churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
             context_dict = {'churchGoers' : churchGoer_list, 'goer' : goer}
             return render_to_response('greeter/bio.html',context_dict, context)
@@ -62,8 +70,6 @@ def getBio(request, goerID):
     context = RequestContext(request)
     goer = churchGoer.objects.get(pk=goerID)
     churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
-
-    
     context_dict = {'churchGoers' : churchGoer_list, 'goer' : goer}
     return render_to_response('greeter/bio.html',context_dict, context)
 
