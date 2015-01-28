@@ -48,7 +48,7 @@ class UserForm(forms.ModelForm):
         fields = ('username', 'password')
 
 class UserProfileForm(forms.ModelForm):
-    
+
     class Meta:
         model = greeterID
         fields = ('churchGoer',)
@@ -56,3 +56,11 @@ class greeterRecordForm(forms.ModelForm):
     class Meta:
         model = greeterRecord
         fields = ('flag',)
+class QuizForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        extra = kwargs.pop('extra')
+        super(QuizForm, self).__init__(*args, **kwargs)
+        self.fields['population'] = forms.MultipleChoiceField(choices=extra, widget=forms.RadioSelect)
+    population = forms.MultipleChoiceField()
+    Answer = forms.CharField(widget=forms.HiddenField)
+

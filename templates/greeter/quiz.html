@@ -5,13 +5,17 @@
  <div class="hero-unit">
         <h1>{{ goer}}</h1>
         {% if goer.picture %}
-        
+
             <img src="{{ MEDIA_URL}}{{goer.picture}}" alt="Profile Picture" /><br/>
             {% endif%}
-   
-{% for id in population %}
+
+<!--{% for id in population %}
     <input type="radio" name="{{ id }}" id="" value="" />     {{ id }} <br />
-{% endfor %}
-        
+{% endfor %}-->
+<form method='post'>
+{{ form.as_p}}
+    <input type='submit' value='submit'>
+</form>
+
 </div>
 {%endblock%}

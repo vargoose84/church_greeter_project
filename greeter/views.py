@@ -4,11 +4,11 @@ from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login, logout
 from greeter.models import churchGoer, greeterID, greeterRecord
 from django.contrib.auth.decorators import login_required
-from greeter.forms import UserForm, UserProfileForm, churchGoerForm
+from greeter.forms import UserForm, UserProfileForm, churchGoerForm, QuizForm
 from django.db.models import Max, Min
 from random import randint, shuffle
 def index(request):
-    context = RequestContext(request)        
+    context = RequestContext(request)
     churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
     context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/index.html',context_dict, context)
@@ -16,20 +16,20 @@ def index(request):
 @login_required
 def addGoer(request):
     context = RequestContext(request)
-    
+
     print request.FILES
     if request.method == 'POST':
         form = churchGoerForm(request.POST, request.FILES)
         if form.is_valid():
-            
+
             goer = form.save(commit=False)
             # goer.save()
             # form.save_m2m()
-            # form.save(commit=True)  
-            
+            # form.save(commit=True)
+
             for t in greeterID.objects.all():
-                greeterRecord.objects.get_or_create(churchGoer=goer, trainerID=t)        
-            
+                greeterRecord.objects.get_or_create(churchGoer=goer, trainerID=t)
+
             churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
             context_dict = {'churchGoers' : churchGoer_list, 'goer' : goer, 'add' : True}
             return render_to_response('greeter/bio.html',context_dict, context)
@@ -64,11 +64,11 @@ def modifyGoer(request,goerID):
         else:
             print churchGoerForm.errors
 
-    else: 
+    else:
         form = churchGoerForm(instance=goer)
         churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
     return render_to_response(
-            'greeter/add_Goer.html',
+            'greeter/add_goer.html',
             {'form': form, 'goer' : goer},
             context)
 
@@ -81,7 +81,7 @@ def getBio(request, goerID):
 
 
 
-    
+
 def getChurch(request,  listType='all'):
     context = RequestContext(request)
     curUser=None
@@ -207,11 +207,11 @@ def user_login(request):
         return render_to_response('greeter/login.html', {}, context)
 
 def churchGoerListCreator(type, goerID=None):
-    churchGoer_list=[]  
+    churchGoer_list=[]
     if type == 'learned':
         for record in greeterRecord.objects.filter(trainerID=goerID, flag=True):
             churchGoer_list.append(record.churchGoer)
-        
+
     elif type == 'unlearned':
         for record in greeterRecord.objects.filter(trainerID=goerID, flag=False):
             churchGoer_list.append(record.churchGoer)
@@ -224,7 +224,7 @@ def churchGoerListCreator(type, goerID=None):
     return churchGoer_list
 def greeterRecordChange(request, goerID):
     context = RequestContext(request)
-    
+
     curTrainerID=greeterID.objects.get(id = request.user.id)
     goer = churchGoer.objects.get(pk=goerID)
     currentRecord = greeterRecord.objects.get(trainerID=curTrainerID, churchGoer=goer)
@@ -237,24 +237,28 @@ def greeterRecordChange(request, goerID):
 def quiz(request):
     context = RequestContext(request)
     if request.method =='POST':
-        form = SomeForm(request.POST)
+        form = QuizForm(request.POST)
         if form.is_valid():
             bob = 5
+
     else:
-        
+
         myMax = churchGoer.objects.aggregate(Max('id'))['id__max']
         toLearnList = greeterRecord.objects.filter(flag=False)
         myTestSubject = getRandom(toLearnList).churchGoer
         myMultipleChoiceField = [myTestSubject.pk,]
+        myPopulation = [(myTestSubject.pk ,myTestSubject),]
         print myMultipleChoiceField
         while len(myMultipleChoiceField) < 4 and len(myMultipleChoiceField) < churchGoer.objects.count() :
             candidate = randint(0,myMax)
             if candidate not in myMultipleChoiceField:
-                myMultipleChoiceField.append(candidate)
-        shuffle(myMultipleChoiceField)
-        myPopulation = churchGoer.objects.filter(id__in=myMultipleChoiceField)
-        #form = QuizForm(population=myPopulation)
-        context_dict = {'population' : myPopulation, 'goer' : myTestSubject }
+                if churchGoer.objects.filter(pk=candidate):
+                    myMultipleChoiceField.append(candidate)
+                    myPopulation += ( candidate, churchGoer.objects.get(pk=candidate) ),
+        shuffle(myPopulation)
+        data = {'Answer' : myTestSubject.pk}
+        form = QuizForm(data, extra=myPopulation)
+        context_dict = {'population' : myPopulation,'form': form, 'goer' : myTestSubject }
         return render_to_response('greeter/quiz.html', context_dict, context)
 def getRandom(liste):
     rv = liste[randint(0,len(liste)-1)]
