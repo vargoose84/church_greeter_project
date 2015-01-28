@@ -35,8 +35,8 @@ class churchGoerForm(forms.ModelForm):
         # url = cleaned_data.get('url')
 
         # # If url is not empty and doesn't start with 'http://', prepend 'http://'.
-        # if url and not url.startswith('http://'):
             # url = 'http://' + url
+        # if url and not url.startswith('http://'):
             # cleaned_data['url'] = url
         # return cleaned_data
 
@@ -56,4 +56,3 @@ class greeterRecordForm(forms.ModelForm):
     class Meta:
         model = greeterRecord
         fields = ('flag',)
-        

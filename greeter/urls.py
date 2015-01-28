@@ -15,5 +15,6 @@ urlpatterns = patterns('',
     url(r'^getChurch/(?P<goerID>\w+)/$', views.getBio, name = 'getBio'),
     url(r'^modifyGoer/(?P<goerID>\w+)/$', views.modifyGoer, name = 'modifyGoer'),
     url(r'^greeterRecordChange/(?P<goerID>\w+)/$',views.greeterRecordChange, name='greeterRecordChange'),
+    url(r'^quiz/$',views.quiz, name='quiz'),
     
 )

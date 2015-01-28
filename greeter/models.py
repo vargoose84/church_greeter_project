@@ -6,6 +6,7 @@ class greeterRecord(models.Model):
     trainerID = models.ForeignKey('greeterID')
     churchGoer = models.ForeignKey('churchGoer')
     flag = models.BooleanField(default=False)
+    quizScore = models.IntegerField(default=0)
     
 class churchGoer(models.Model):
     gender_choices = (('male', 'male'),('female','female'),)
@@ -57,18 +58,16 @@ def connect_child(sender, instance, action, reverse, model, pk_set, **kwargs):
     # print "reverse?", reverse
     # print "Instance=",instance.id
     # print "primary_key=", pk_set
-    if pk_set:
-        if action == "pre_remove":           
-            for parent in pk_set:
-                print 'remove parent', parent
-                # when you add Bob as parent, them bob meeds his list of children updated to match this. 
-                if not reverse:
-                    instance.myparents.remove(parent)     
-                    cg = churchGoer.objects.get(pk=parent)
-                    print "Removing ", cg, " a child of ", instance
+    if not reverse:
+        if action == "post_clear":   
+            instance.myparents.clear()
+            print "removed parents in all children"
+            for child in instance.children.all():
+                instance.myparents.add(child)
+                print "Removing ", instance, " a parent of ", parent
                     # cg.mychildren.add(instance)
                     # print "Making ", cg, " a child of ", instance
-
+    if pk_set:
         if action == "post_add":
             for parent in pk_set:
                 print 'save parent', parent
@@ -85,19 +84,16 @@ def connect_parent(sender, instance, action, reverse, model, pk_set, **kwargs):
     # print "reverse?", reverse
     # print "Instance=",instance.id
     # print "primary_key=", pk_set
-    print model
-    if pk_set:
-        print "action and PK", action, pk_set
-        if action == "pre_remove":           
-            for child in pk_set:
-                print 'remove child', child
-                # when you add Bob as parent, them bob meeds his list of children updated to match this. 
-                if not reverse:
-                    instance.mychildren.remove(child)
-                    cg = churchGoer.objects.get(pk=child)
-                    print "Removing ", cg, " a parent of ", instance
-                    # cg.myparents.add(instance)
+    if not reverse:
+        if action == "post_clear":   
+            instance.mychildren.clear()
+            print "removed child in all parents"
+            for parent in instance.parents.all():
+                instance.mychildren.add(parent)
+                print "Removing ", instance, " a parent of ", parent
+                    # cg.mychildren.add(instance)
                     # print "Making ", cg, " a child of ", instance
+    if pk_set:
         if action == "post_add":
             for child in pk_set:
                 print 'save child', child
