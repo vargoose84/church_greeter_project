@@ -22,10 +22,7 @@ def addGoer(request):
         form = churchGoerForm(request.POST, request.FILES)
         if form.is_valid():
 
-            goer = form.save(commit=False)
-            # goer.save()
-            # form.save_m2m()
-            # form.save(commit=True)
+            goer = form.save()
 
             for t in greeterID.objects.all():
                 greeterRecord.objects.get_or_create(churchGoer=goer, trainerID=t)
