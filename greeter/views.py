@@ -236,30 +236,40 @@ def greeterRecordChange(request, goerID):
     return render_to_response('greeter/getChurch.html', context_dict, context)
 def quiz(request):
     context = RequestContext(request)
+    message = ''
+    Answer = None
+    myMax = churchGoer.objects.aggregate(Max('id'))['id__max']
+    toLearnList = greeterRecord.objects.filter(flag=False, trainerID=request.user.pk)
+    myTestSubject = getRandom(toLearnList).churchGoer
+    myMultipleChoiceField = [myTestSubject.pk,]
+    myPopulation = [(myTestSubject.pk ,myTestSubject),]
+    churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
+    while len(myMultipleChoiceField) < 4 and len(myMultipleChoiceField) < churchGoer.objects.count():
+        candidate = randint(0,myMax)
+        if candidate not in myMultipleChoiceField:
+            if churchGoer.objects.filter(pk=candidate):
+                myMultipleChoiceField.append(candidate)
+                myPopulation += (candidate, churchGoer.objects.get(pk=candidate)),
+    shuffle(myPopulation)
+    data = {'Answer' : (myTestSubject.pk, myTestSubject)}
     if request.method =='POST':
         form = QuizForm(request.POST)
-        if form.is_valid():
-            bob = 5
-
-    else:
-
-        myMax = churchGoer.objects.aggregate(Max('id'))['id__max']
-        toLearnList = greeterRecord.objects.filter(flag=False)
-        myTestSubject = getRandom(toLearnList).churchGoer
-        myMultipleChoiceField = [myTestSubject.pk,]
-        myPopulation = [(myTestSubject.pk ,myTestSubject),]
-        print myMultipleChoiceField
-        while len(myMultipleChoiceField) < 4 and len(myMultipleChoiceField) < churchGoer.objects.count() :
-            candidate = randint(0,myMax)
-            if candidate not in myMultipleChoiceField:
-                if churchGoer.objects.filter(pk=candidate):
-                    myMultipleChoiceField.append(candidate)
-                    myPopulation += ( candidate, churchGoer.objects.get(pk=candidate) ),
-        shuffle(myPopulation)
-        data = {'Answer' : myTestSubject.pk}
-        form = QuizForm(data, extra=myPopulation)
-        context_dict = {'population' : myPopulation,'form': form, 'goer' : myTestSubject }
-        return render_to_response('greeter/quiz.html', context_dict, context)
+        temp = request.POST.getlist('Answer')[0]
+        temp = temp[1]
+        Answer = churchGoer.objects.get(pk=temp)
+        gr=greeterRecord.objects.get(trainerID=request.user.pk, churchGoer=Answer)
+        if temp == request.POST.getlist('population')[0]:
+            gr.quizScore += 1
+            if gr.quizScore >=3:
+                gr.flag = True
+            message = "Correct!"   
+        else:
+            gr.quizScore -= 1
+            message =  'Incorrect! '
+        gr.save()
+    form = QuizForm(initial=data, extra=myPopulation)
+    context_dict = {'form': form, 'goer' : myTestSubject, 'message' : message, 'incorrectAnswer': Answer, 'churchGoers':churchGoer_list}
+    return render_to_response('greeter/quiz.html', context_dict, context)
 def getRandom(liste):
     rv = liste[randint(0,len(liste)-1)]
     return rv

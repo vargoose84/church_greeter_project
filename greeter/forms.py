@@ -58,9 +58,10 @@ class greeterRecordForm(forms.ModelForm):
         fields = ('flag',)
 class QuizForm(forms.Form):
     def __init__(self, *args, **kwargs):
+        extra = kwargs.setdefault('extra',())
         extra = kwargs.pop('extra')
         super(QuizForm, self).__init__(*args, **kwargs)
         self.fields['population'] = forms.MultipleChoiceField(choices=extra, widget=forms.RadioSelect)
     population = forms.MultipleChoiceField()
-    Answer = forms.CharField(widget=forms.HiddenField)
+    Answer = forms.CharField(widget=forms.HiddenInput)
 
