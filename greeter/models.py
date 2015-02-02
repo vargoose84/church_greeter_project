@@ -7,7 +7,7 @@ class greeterRecord(models.Model):
     churchGoer = models.ForeignKey('churchGoer')
     flag = models.BooleanField(default=False)
     quizScore = models.IntegerField(default=0)
-    
+
 class churchGoer(models.Model):
     gender_choices = (('male', 'male'),('female','female'),)
     birthdate = models.DateField(auto_now=False, auto_now_add=False, blank=True)
@@ -21,71 +21,46 @@ class churchGoer(models.Model):
     picture = models.ImageField(upload_to='profile_images', blank=True)
     occupation = models.CharField(max_length=128, blank=True)
     def __unicode__(self):
-        return self.first_name + " " + self.last_name 
-    # def add_familyRelation(self, goer, symm=True):
-        # familyRelation, created = familyRelation.objects.get_or_create(from_person = self, to_person = goer)
-        # if symm:
-            # goer.add_familyRelation(self
-        # return familyRelation
-    # def remove_familyRelation(self, person, symm=True ):
-        # familyRelation.objects.filter(from_person=self,to_person=person).delete()
-    # def get_parents(self):
-        # return self.parents.filter(from_people__to_person=self)
-    # def get_children(self):
-        # return self.children.filter(from_people__to_person=self)
-    
-        
-    
-    
-class familyRelation(models.Model):
-    from_person = models.ForeignKey(churchGoer, related_name='from_people')
-    to_person = models.ForeignKey(churchGoer, related_name='to_people')
+        return self.first_name + " " + self.last_name
 
-    
-        
 class greeterID(models.Model):
-    # This line is required. Links UserProfi    le to a User model instance.
+    # This line is required. Links UserProfile to a User model instance.
     user = models.OneToOneField(User)
-    churchGoer =  models.OneToOneField(churchGoer) 
+    churchGoer =  models.OneToOneField(churchGoer)
 
     # Override the __unicode__() method to return out something meaningful!
     def __unicode__(self):
         return self.user.username
+#the following functions handle reverse relationships.  If someone is a child, then obviously another person is a parent
 
-
+#if someone declares the he/she has children then go to each of those children, clear the parents and re add the parent that we just connected
+#just realized this could ACCIDENTally clear the parent that was already there and VICE versa, so this will be fixed in a later release.
 def connect_child(sender, instance, action, reverse, model, pk_set, **kwargs):
-    # print "connect.child called with action '%s'" %action
-    # print "reverse?", reverse
-    # print "Instance=",instance.id
-    # print "primary_key=", pk_set
     if not reverse:
-        if action == "post_clear":   
+        if action == "post_clear":
             instance.myparents.clear()
             print "removed parents in all children"
             for child in instance.children.all():
                 instance.myparents.add(child)
-                print "Removing ", instance, " a parent of ", parent
+                print "Adding ", instance, " a parent of ", parent
                     # cg.mychildren.add(instance)
                     # print "Making ", cg, " a child of ", instance
     if pk_set:
         if action == "post_add":
             for parent in pk_set:
                 print 'save parent', parent
-                # when you add Bob as parent, them bob meeds his list of children updated to match this. 
+                # when you add Bob as parent, them bob meeds his list of children updated to match this.
                 if not reverse:
-                    instance.myparents.add(parent)     
+                    instance.myparents.add(parent)
                     cg = churchGoer.objects.get(pk=parent)
                     print "Making ", cg, " a child of ", instance
                     # cg.mychildren.add(instance)
                     # print "Making ", cg, " a child of ", instance
 
 def connect_parent(sender, instance, action, reverse, model, pk_set, **kwargs):
-    # print "connect.parent called with action '%s'" %action
-    # print "reverse?", reverse
-    # print "Instance=",instance.id
-    # print "primary_key=", pk_set
+
     if not reverse:
-        if action == "post_clear":   
+        if action == "post_clear":
             instance.mychildren.clear()
             print "removed child in all parents"
             for parent in instance.parents.all():
@@ -97,13 +72,13 @@ def connect_parent(sender, instance, action, reverse, model, pk_set, **kwargs):
         if action == "post_add":
             for child in pk_set:
                 print 'save child', child
-                # when you add Bob as parent, them bob meeds his list of children updated to match this. 
                 if not reverse:
                     instance.mychildren.add(child)
                     cg = churchGoer.objects.get(pk=child)
                     print "Making ", cg, " a parent of ", instance
                     # cg.myparents.add(instance)
                     # print "Making ", cg, " a child of ", instance
-                
+
+
 m2m_changed.connect(connect_child, sender=churchGoer.children.through, weak=False)
 m2m_changed.connect(connect_parent, sender=churchGoer.parents.through, weak=False)

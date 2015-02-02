@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
+from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login, logout
@@ -16,17 +16,13 @@ def index(request):
 @login_required
 def addGoer(request):
     context = RequestContext(request)
-
-    print request.FILES
     if request.method == 'POST':
         form = churchGoerForm(request.POST, request.FILES)
         if form.is_valid():
-
             goer = form.save()
-
+            #add this new churchgoer to all Greeters list of people to learn
             for t in greeterID.objects.all():
                 greeterRecord.objects.get_or_create(churchGoer=goer, trainerID=t)
-
             churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
             context_dict = {'churchGoers' : churchGoer_list, 'goer' : goer, 'add' : True}
             return render_to_response('greeter/bio.html',context_dict, context)
@@ -45,13 +41,6 @@ def modifyGoer(request,goerID):
 
         if  form.is_valid():
             goer = form.save(commit=False)
-            print request.POST.getlist('parents')
-            print request.POST.getlist('children')
-            print form.cleaned_data.get('children')
-            print form.cleaned_data.get('parents')
-            print goer.mychildren.all()
-            print goer.mychildren.clear()
-            print goer.myparents.all()
             goer.save()
             form.save_m2m()
             form.save(commit=True)
@@ -68,7 +57,7 @@ def modifyGoer(request,goerID):
             'greeter/add_goer.html',
             {'form': form, 'goer' : goer},
             context)
-
+#This function returns all fields of a churchGoer and presents them
 def getBio(request, goerID):
     context = RequestContext(request)
     goer = churchGoer.objects.get(pk=goerID)
@@ -78,7 +67,9 @@ def getBio(request, goerID):
 
 
 
-
+#This function lists all churchgoers of a certain type in a table
+#It also persists that type after clicking anywhere in the site
+#meaning the sidebar will hold it's "learned,unlearned, all value"
 def getChurch(request,  listType='all'):
     context = RequestContext(request)
     request.session['listType']=listType
@@ -87,104 +78,55 @@ def getChurch(request,  listType='all'):
     churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
     context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/getChurch.html', context_dict, context)
-
+#this function registers a new trainer
+#some of this is a copy paste of the website training functions
 def register(request):
-    # Like before, get the request's context.
     context = RequestContext(request)
-
-    # A boolean value for telling the template whether the registration was successful.
-    # Set to False initially. Code changes value to True when registration succeeds.
     registered = False
-
-    # If it's a HTTP POST, we're interested in processing form data.
     if request.method == 'POST':
-        # Attempt to grab information from the raw form information.
-        # Note that we make use of both UserForm and UserProfileForm.
         user_form = UserForm(data=request.POST)
         profile_form = UserProfileForm(data=request.POST)
-
-        # If the two forms are valid...
         if user_form.is_valid() and profile_form.is_valid():
-            # Save the user's form data to the database.
             user = user_form.save()
-
-            # Now we hash the password with the set_password method.
-            # Once hashed, we can update the user object.
             user.set_password(user.password)
             user.save()
-
-            # Now sort out the UserProfile instance.
-            # Since we need to set the user attribute ourselves, we set commit=False.
-            # This delays saving the model until we're ready to avoid integrity problems.
             profile = profile_form.save(commit=False)
             profile.user = user
-
-            # Did the user provide a profile picture?
-            # If so, we need to get it from the input form and put it in the UserProfile model.
             if 'picture' in request.FILES:
                 profile.picture = request.FILES['picture']
-
-            # Now we save the UserProfile model instance.
             profile.save()
+            #After saving the new Greeter, we need to populate his list of people to learn
             for c in churchGoer.objects.all():
                 greeterRecord.objects.get_or_create(churchGoer=c, trainerID=profile)
-            # Update our variable to tell the template registration was successful.
             registered = True
-
-        # Invalid form or forms - mistakes or something else?
-        # Print problems to the terminal.
-        # They'll also be shown to the user.
         else:
             print user_form.errors, profile_form.errors
-
-    # Not a HTTP POST, so we render our form using two ModelForm instances.
-    # These forms will be blank, ready for user input.
     else:
         user_form = UserForm()
         profile_form = UserProfileForm()
-
-    # Render the template depending on the context.
     return render_to_response(
             'greeter/register.html',
             {'user_form': user_form, 'profile_form': profile_form, 'registered': registered},
             context)
-
+#this is another copy pasted function from the training app
 @login_required
 def user_logout(request):
-    # Since we know the user is logged in, we can now just log them out.
     logout(request)
-
-    # Take the user back to the homepage.
     return HttpResponseRedirect('/greeter/')
 
-
+#this is another copy pasted and modified function from the training app
 def user_login(request):
-    # Like before, obtain the context for the user's request.
     context = RequestContext(request)
-
-    # If the request is a HTTP POST, try to pull out the relevant information.
     if request.method == 'POST':
-        # Gather the username and password provided by the user.
-        # This information is obtained from the login form.
         username = request.POST['username']
         password = request.POST['password']
         request.session['listType'] = 'unlearned'
-        # Use Django's machinery to attempt to see if the username/password
-        # combination is valid - a User object is returned if it is.
         user = authenticate(username=username, password=password)
-
-        # If we have a User object, the details are correct.
-        # If None (Python's way of representing the absence of a value), no user
-        # with matching credentials was found.
         if user:
-            # Is the account active? It could have been disabled.
             if user.is_active:
-                # If the account is valid and active, we can log the user in.
-                # We'll send the user back to the homepage.
                 login(request, user)
                 return HttpResponseRedirect('/greeter/')
             else:
-                # An inactive account was used - no logging in!
                 context_dict = {'bold_message': "Whooops your account is disabled"}
                 return render_to_response('greeter/ERROR.html', context_dict, context)
         else:
@@ -192,17 +134,13 @@ def user_login(request):
             print "Invalid login details: {0}, {1}".format(username, password)
             context_dict = {'bold_message': "WRONG Details DUUUUUDE"}
             return render_to_response('greeter/ERROR.html', context_dict, context)
-
-    # The request is not a HTTP POST, so display the login form.
-    # This scenario would most likely be a HTTP GET.
     else:
-        # No context variables to pass to the template system, hence the
-        # blank dictionary object...
         return render_to_response('greeter/login.html', {}, context)
-
+#This function returns a list based on the type variable: learned, unlearned, all
+#This list queries the database based on the signed in user
 def churchGoerListCreator(quest, type):
     churchGoer_list=[]
-    
+
     if quest.user.is_authenticated:
         greeter=[]
         greeter = greeterID.objects.filter(user_id=quest.user.pk)
@@ -221,6 +159,9 @@ def churchGoerListCreator(quest, type):
     else:
         churchGoer_list = churchGoer.objects.all()
     return churchGoer_list
+#if the user wishes to change the goerID to learned status, or if through the quiz the user succeeds in memorizing the goerID ,
+#we'll mark the flag as true
+@login_required
 def greeterRecordChange(request, goerID):
     context = RequestContext(request)
 
@@ -229,20 +170,23 @@ def greeterRecordChange(request, goerID):
     currentRecord = greeterRecord.objects.get(trainerID=curTrainerID, churchGoer=goer)
     currentRecord.flag = True
     currentRecord.save()
-    curUser = greeterID.objects.get(id = request.user.id)
     churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
     context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/getChurch.html', context_dict, context)
+#This is the quiz code it's complicated:
+#   Whenever the "Take my Quiz", or quiz Submit button is pressed
+#   We are going to get a random person who is unlearned to the user for testing
+#       and then also grab 3 other randomly selected church goers to create the multiple choice field
+#   If the user answers correctly increment the quiz score property,
+#       otherwise decrease it
 @login_required
 def quiz(request):
     context = RequestContext(request)
     message = ''
     Answer = None
     curTrainerID = greeterID.objects.filter(user_id=request.user.pk)
-    myUserID= greeterID.objects.get( user_id= request.user.pk).churchGoer.pk
     churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
     myMax = churchGoer.objects.aggregate(Max('id'))['id__max']
-    #toLearnList = churchGoerListCreator(type='unlearned', goerID = myUserID)
     toLearnList =churchGoerListCreator(quest=request, type='unlearned')
     myTestSubject = getRandom(toLearnList)
     myMultipleChoiceField = [myTestSubject.pk,]
@@ -274,6 +218,7 @@ def quiz(request):
     form = QuizForm(initial=data, extra=myPopulation)
     context_dict = {'form': form, 'goer' : myTestSubject, 'message' : message, 'incorrectAnswer': Answer, 'churchGoers':churchGoer_list}
     return render_to_response('greeter/quiz.html', context_dict, context)
+#mini function to return a random object in a list
 def getRandom(liste):
     rv = liste[randint(0,len(liste)-1)]
     return rv
