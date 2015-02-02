@@ -86,7 +86,7 @@ def getChurch(request,  listType='all'):
     print request.user, listType
     context_dict = []
     if request.user.is_authenticated():
-        curUser = greeterID.objects.get(id = request.user.id)
+        curUser = greeterID.objects.get( user_id= request.user.pk)
     churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = curUser)
     context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/getChurch.html', context_dict, context)
@@ -231,16 +231,20 @@ def greeterRecordChange(request, goerID):
     churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = curUser)
     context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/getChurch.html', context_dict, context)
+@login_required
 def quiz(request):
     context = RequestContext(request)
     message = ''
     Answer = None
+    myUserID= greeterID.objects.get( user_id= request.user.pk).churchGoer.pk
+    churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = myUserID)
     myMax = churchGoer.objects.aggregate(Max('id'))['id__max']
-    toLearnList = greeterRecord.objects.filter(flag=False, trainerID=request.user.pk)
-    myTestSubject = getRandom(toLearnList).churchGoer
+    #toLearnList = churchGoerListCreator(type='unlearned', goerID = myUserID)
+    toLearnList =churchGoerListCreator(type='unlearned', goerID = myUserID)
+    myTestSubject = getRandom(toLearnList)
     myMultipleChoiceField = [myTestSubject.pk,]
     myPopulation = [(myTestSubject.pk ,myTestSubject),]
-    churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
+
     while len(myMultipleChoiceField) < 4 and len(myMultipleChoiceField) < churchGoer.objects.count():
         candidate = randint(0,myMax)
         if candidate not in myMultipleChoiceField:
@@ -259,7 +263,7 @@ def quiz(request):
             gr.quizScore += 1
             if gr.quizScore >=3:
                 gr.flag = True
-            message = "Correct!"   
+            message = "Correct!"
         else:
             gr.quizScore -= 1
             message =  'Incorrect! '
