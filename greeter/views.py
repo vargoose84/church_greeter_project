@@ -9,7 +9,7 @@ from django.db.models import Max, Min
 from random import randint, shuffle
 def index(request):
     context = RequestContext(request)
-    churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
+    churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
     context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/index.html',context_dict, context)
 
@@ -27,7 +27,7 @@ def addGoer(request):
             for t in greeterID.objects.all():
                 greeterRecord.objects.get_or_create(churchGoer=goer, trainerID=t)
 
-            churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
+            churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
             context_dict = {'churchGoers' : churchGoer_list, 'goer' : goer, 'add' : True}
             return render_to_response('greeter/bio.html',context_dict, context)
         else:
@@ -55,7 +55,7 @@ def modifyGoer(request,goerID):
             goer.save()
             form.save_m2m()
             form.save(commit=True)
-            churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
+            churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
             context_dict = {'churchGoers' : churchGoer_list, 'goer' : goer}
             return render_to_response('greeter/bio.html',context_dict, context)
         else:
@@ -63,7 +63,7 @@ def modifyGoer(request,goerID):
 
     else:
         form = churchGoerForm(instance=goer)
-        churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
+        churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
     return render_to_response(
             'greeter/add_goer.html',
             {'form': form, 'goer' : goer},
@@ -72,7 +72,7 @@ def modifyGoer(request,goerID):
 def getBio(request, goerID):
     context = RequestContext(request)
     goer = churchGoer.objects.get(pk=goerID)
-    churchGoer_list = churchGoerListCreator(type=request.session.get('listType'), goerID = request.user.pk)
+    churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
     context_dict = {'churchGoers' : churchGoer_list, 'goer' : goer}
     return render_to_response('greeter/bio.html',context_dict, context)
 
@@ -81,13 +81,10 @@ def getBio(request, goerID):
 
 def getChurch(request,  listType='all'):
     context = RequestContext(request)
-    curUser=None
     request.session['listType']=listType
     print request.user, listType
     context_dict = []
-    if request.user.is_authenticated():
-        curUser = greeterID.objects.get( user_id= request.user.pk)
-    churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = curUser)
+    churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
     context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/getChurch.html', context_dict, context)
 
@@ -203,32 +200,37 @@ def user_login(request):
         # blank dictionary object...
         return render_to_response('greeter/login.html', {}, context)
 
-def churchGoerListCreator(type, goerID=None):
+def churchGoerListCreator(quest, type):
     churchGoer_list=[]
-    if type == 'learned':
-        for record in greeterRecord.objects.filter(trainerID=goerID, flag=True):
-            churchGoer_list.append(record.churchGoer)
+    
+    if quest.user.is_authenticated:
+        greeter=[]
+        greeter = greeterID.objects.filter(user_id=quest.user.pk)
+        if type == 'learned':
+            for record in greeterRecord.objects.filter(trainerID=greeter, flag=True):
+                churchGoer_list.append(record.churchGoer)
 
-    elif type == 'unlearned':
-        for record in greeterRecord.objects.filter(trainerID=goerID, flag=False):
-            churchGoer_list.append(record.churchGoer)
-    elif type == 'reset':
-        for record in greeterRecord.objects.filter(trainerID=goerID, flag=True):
-            record.flag = False
-            record.save()
+        elif type == 'unlearned':
+            for record in greeterRecord.objects.filter(trainerID=greeter, flag=False):
+                churchGoer_list.append(record.churchGoer)
+
+        elif type == 'reset':
+            for record in greeterRecord.objects.filter(trainerID=greeter, flag=True):
+                record.flag = False
+                record.save()
     else:
         churchGoer_list = churchGoer.objects.all()
     return churchGoer_list
 def greeterRecordChange(request, goerID):
     context = RequestContext(request)
 
-    curTrainerID=greeterID.objects.get(id = request.user.id)
+    curTrainerID=greeterID.objects.filter(user_id=request.user.pk)
     goer = churchGoer.objects.get(pk=goerID)
     currentRecord = greeterRecord.objects.get(trainerID=curTrainerID, churchGoer=goer)
     currentRecord.flag = True
     currentRecord.save()
     curUser = greeterID.objects.get(id = request.user.id)
-    churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = curUser)
+    churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
     context_dict = {'churchGoers' : churchGoer_list}
     return render_to_response('greeter/getChurch.html', context_dict, context)
 @login_required
@@ -236,11 +238,12 @@ def quiz(request):
     context = RequestContext(request)
     message = ''
     Answer = None
+    curTrainerID = greeterID.objects.filter(user_id=request.user.pk)
     myUserID= greeterID.objects.get( user_id= request.user.pk).churchGoer.pk
-    churchGoer_list =churchGoerListCreator(type=request.session.get('listType'), goerID = myUserID)
+    churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
     myMax = churchGoer.objects.aggregate(Max('id'))['id__max']
     #toLearnList = churchGoerListCreator(type='unlearned', goerID = myUserID)
-    toLearnList =churchGoerListCreator(type='unlearned', goerID = myUserID)
+    toLearnList =churchGoerListCreator(quest=request, type='unlearned')
     myTestSubject = getRandom(toLearnList)
     myMultipleChoiceField = [myTestSubject.pk,]
     myPopulation = [(myTestSubject.pk ,myTestSubject),]
@@ -258,7 +261,7 @@ def quiz(request):
         temp = request.POST.getlist('Answer')[0]
         temp = temp[1]
         Answer = churchGoer.objects.get(pk=temp)
-        gr=greeterRecord.objects.get(trainerID=request.user.pk, churchGoer=Answer)
+        gr=greeterRecord.objects.get(trainerID_id=curTrainerID, churchGoer=Answer)
         if temp == request.POST.getlist('population')[0]:
             gr.quizScore += 1
             if gr.quizScore >=3:
