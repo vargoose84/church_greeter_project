@@ -16,5 +16,6 @@ urlpatterns = patterns('',
     url(r'^modifyGoer/(?P<goerID>\w+)/$', views.modifyGoer, name = 'modifyGoer'),
     url(r'^greeterRecordChange/(?P<goerID>\w+)/$',views.greeterRecordChange, name='greeterRecordChange'),
     url(r'^quiz/$',views.quiz, name='quiz'),
+    url(r'^postSuggestion/$',views.postSuggestion, name='postSuggestion'),
     
 )

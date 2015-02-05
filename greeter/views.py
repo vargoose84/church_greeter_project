@@ -4,7 +4,7 @@ from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login, logout
 from greeter.models import churchGoer, greeterID, greeterRecord
 from django.contrib.auth.decorators import login_required
-from greeter.forms import UserForm, UserProfileForm, churchGoerForm, QuizForm
+from greeter.forms import UserForm, UserProfileForm, churchGoerForm, QuizForm, SuggestionForm
 from django.db.models import Max, Min
 from random import randint, shuffle
 def index(request):
@@ -222,3 +222,27 @@ def quiz(request):
 def getRandom(liste):
     rv = liste[randint(0,len(liste)-1)]
     return rv
+
+def postSuggestion(request):
+    context = RequestContext(request)
+    if request.method == 'POST':
+        form = SuggestionForm(request.POST)
+        print form
+        if form.is_valid():
+            mySuggestion = form.save(commit=False)
+            
+            if mySuggestion.category:
+                mySuggestion.save()
+                form.save()
+            else:
+                mySuggestion.category = form.add_category
+            return HttpResponseRedirect('greeter/index.html')
+            
+        else:
+            print form.errors
+    else:
+        curTrainerID = greeterID.objects.get(user_id=request.user.pk)
+        form = SuggestionForm(greeter=curTrainerID)
+    return render_to_response('greeter/GiveSuggestion.html',{'form': form}, context)
+        
+        

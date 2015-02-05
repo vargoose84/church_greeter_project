@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from greeter.models import churchGoer, greeterID, greeterRecord
+from greeter.models import churchGoer, greeterID, greeterRecord, suggestion
 
 class churchGoerForm(forms.ModelForm):
     class Meta:
@@ -64,4 +64,18 @@ class QuizForm(forms.Form):
         self.fields['population'] = forms.MultipleChoiceField(choices=extra, widget=forms.RadioSelect)
     population = forms.MultipleChoiceField()
     Answer = forms.CharField(widget=forms.HiddenInput)
+
+class SuggestionForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        greeter = kwargs.setdefault('greeter',())
+        greeter = kwargs.pop('greeter')
+        super(SuggestionForm, self).__init__(*args, **kwargs)
+        self.fields['greeterID'] = greeter
+    category = forms.ModelMultipleChoiceField(queryset = suggestion.objects.all(), required=False)
+    add_category = forms.CharField(max_length = 500)
+    greeterID = forms.CharField()
+    
+    class Meta:
+        model = suggestion
+        fields = ('category','add_category','description', 'greeterID')
 

@@ -2,12 +2,19 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import *
 
+class suggestion(models.Model):
+    greeterID = models.ForeignKey('greeterID')
+    category = models.CharField(max_length=128)
+    subject = models.CharField(max_length = 500)
+    description = models.TextField()
+    
 class greeterRecord(models.Model):
     trainerID = models.ForeignKey('greeterID')
     churchGoer = models.ForeignKey('churchGoer')
     flag = models.BooleanField(default=False)
     quizScore = models.IntegerField(default=0)
-
+    def __unicode__(self):
+        return self.trainerID.churchGoer.first_name + " " + self.trainerID.churchGoer.last_name + ": "  + self.churchGoer.first_name + " " + self.churchGoer.last_name
 class churchGoer(models.Model):
     gender_choices = (('male', 'male'),('female','female'),)
     birthdate = models.DateField(auto_now=False, auto_now_add=False, blank=True)
@@ -31,10 +38,12 @@ class greeterID(models.Model):
     # Override the __unicode__() method to return out something meaningful!
     def __unicode__(self):
         return self.user.username
-#the following functions handle reverse relationships.  If someone is a child, then obviously another person is a parent
+        
+#the following functions handle reverse relationships.  
+#If someone is a child, then obviously another person is a parent
+#if someone declares the he/she has children then go to each of those children, 
+#clear the parents and re add the parent that we just connected
 
-#if someone declares the he/she has children then go to each of those children, clear the parents and re add the parent that we just connected
-#just realized this could ACCIDENTally clear the parent that was already there and VICE versa, so this will be fixed in a later release.
 def connect_child(sender, instance, action, reverse, model, pk_set, **kwargs):
     if not reverse:
         if action == "post_clear":
