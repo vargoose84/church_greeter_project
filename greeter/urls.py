@@ -17,5 +17,6 @@ urlpatterns = patterns('',
     url(r'^greeterRecordChange/(?P<goerID>\w+)/$',views.greeterRecordChange, name='greeterRecordChange'),
     url(r'^quiz/$',views.quiz, name='quiz'),
     url(r'^postSuggestion/$',views.postSuggestion, name='postSuggestion'),
+    url(r'^viewSuggestions/$',views.viewSuggestions, name='viewSuggestions'),
     
-)
+)   

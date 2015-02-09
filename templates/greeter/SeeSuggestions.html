@@ -1,0 +1,34 @@
+{% extends 'greeter/base.html'%}
+
+{% load static %} <!-- New line -->
+
+{% block body_block%}
+<div class="hero-unit">
+    {% if suggestions %}
+    <ul>
+        <table style="width:100%">
+          <tr>
+            <th>Greeter</th>
+            <th>Category</th>
+            <th>Subject</th>
+            <th>Description</th>
+          </tr>
+        {% for suggestion in suggestions %}
+            <tr>
+                <td>{{suggestion.greeterID}}</td>
+                <td>{{suggestion.category}} </td>
+                <td>{{suggestion.subject}} </td>
+                <td>{{suggestion.description}} </td>
+            </tr>
+        {% endfor %}
+        </table>
+    </ul>
+    {% else %}
+        <strong>No suggestion in current view.</strong>
+    {% endif %}
+
+<a href="/greeter/">Home</a><br />
+</div>
+
+{% endblock%}
+

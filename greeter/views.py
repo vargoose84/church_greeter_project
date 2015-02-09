@@ -2,7 +2,7 @@ from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login, logout
-from greeter.models import churchGoer, greeterID, greeterRecord
+from greeter.models import churchGoer, greeterID, greeterRecord, suggestion
 from django.contrib.auth.decorators import login_required
 from greeter.forms import UserForm, UserProfileForm, churchGoerForm, QuizForm, SuggestionForm
 from django.db.models import Max, Min
@@ -145,19 +145,23 @@ def churchGoerListCreator(quest, type):
         greeter=[]
         greeter = greeterID.objects.filter(user_id=quest.user.pk)
         if type == 'learned':
-            for record in greeterRecord.objects.filter(trainerID=greeter, flag=True):
+            for record in greeterRecord.objects.filter(trainerID=greeter, flag=True).order_by('churchGoer__first_name'):
                 churchGoer_list.append(record.churchGoer)
 
         elif type == 'unlearned':
-            for record in greeterRecord.objects.filter(trainerID=greeter, flag=False):
+            for record in greeterRecord.objects.filter(trainerID=greeter, flag=False).order_by('churchGoer__first_name'):
                 churchGoer_list.append(record.churchGoer)
 
         elif type == 'reset':
-            for record in greeterRecord.objects.filter(trainerID=greeter, flag=True):
+            for record in greeterRecord.objects.filter(trainerID=greeter, flag=True).order_by('churchGoer__first_name'):
                 record.flag = False
                 record.save()
+        else:
+            for record in churchGoer.objects.all().order_by('first_name'):
+                churchGoer_list.append(record)
     else:
-        churchGoer_list = churchGoer.objects.all()
+        for record in churchGoer.objects.all().order_by('first_name'):
+            churchGoer_list.append(record)
     return churchGoer_list
 #if the user wishes to change the goerID to learned status, or if through the quiz the user succeeds in memorizing the goerID ,
 #we'll mark the flag as true
@@ -223,6 +227,13 @@ def getRandom(liste):
     rv = liste[randint(0,len(liste)-1)]
     return rv
 
+def viewSuggestions(request):
+    context = RequestContext(request)
+    churchGoer_list = churchGoerListCreator(quest=request, type=request.session.get('listType'))
+    suggestions = suggestion.objects.all()
+    context_dict = {'churchGoers' : churchGoer_list, 'suggestions': suggestions}
+    return render_to_response('greeter/SeeSuggestions.html', context_dict, context)
+    
 def postSuggestion(request):
     context = RequestContext(request)
     if request.method == 'POST':
@@ -230,19 +241,21 @@ def postSuggestion(request):
         print form
         if form.is_valid():
             mySuggestion = form.save(commit=False)
-            
-            if mySuggestion.category:
+            print "my premade category is:", mySuggestion.category
+            if mySuggestion.category is None:
                 mySuggestion.save()
                 form.save()
             else:
-                mySuggestion.category = form.add_category
-            return HttpResponseRedirect('greeter/index.html')
+                mySuggestion.category = form.cleaned_data['add_category']
+                mySuggestion.save()
+                form.save()
+            return HttpResponseRedirect('/greeter/viewSuggestions/')
             
         else:
             print form.errors
     else:
         curTrainerID = greeterID.objects.get(user_id=request.user.pk)
-        form = SuggestionForm(greeter=curTrainerID)
+        form = SuggestionForm(initial={'greeterID': curTrainerID.pk})
     return render_to_response('greeter/GiveSuggestion.html',{'form': form}, context)
         
         
