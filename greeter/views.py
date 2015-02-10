@@ -102,11 +102,14 @@ def register(request):
         else:
             print user_form.errors, profile_form.errors
     else:
+        
+        myGreeters = greeterID.objects.all().values_list('churchGoer__pk')
+        availableChurchGoers =  churchGoer.objects.all().exclude(pk__in = myGreeters)
         user_form = UserForm()
         profile_form = UserProfileForm()
     return render_to_response(
             'greeter/register.html',
-            {'user_form': user_form, 'profile_form': profile_form, 'registered': registered},
+            {'user_form': user_form, 'profile_form': profile_form, 'registered': registered, 'availableChurchGoers' : availableChurchGoers,},
             context)
 #this is another copy pasted function from the training app
 @login_required
