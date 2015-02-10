@@ -4,9 +4,11 @@
  {%block body_block%}
  <div class="hero-unit">
         <h1>Post a Bug or Enhancement</h1>
-
+        {% if mySuggestion %}
+        <form id="SuggestionForm" method="post" action="/greeter/postSuggestion/{{mySuggestion.pk}}/" enctype="multipart/form-data" >
+        {%else%}
         <form id="SuggestionForm" method="post" action="/greeter/postSuggestion/" enctype="multipart/form-data" >
-
+        {%endif%}
             {% csrf_token %}
             {% for hidden in form.hidden_fields %}
                 {{ hidden }}

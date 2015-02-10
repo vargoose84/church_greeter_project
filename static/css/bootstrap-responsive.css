@@ -1107,3 +1107,12 @@
     overflow: visible !important;
   }
 }
+.img-pp {
+  width: auto;
+  height: auto;
+  max-width:500px;
+  max-height:200px;
+  vertical-align: middle;
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+}

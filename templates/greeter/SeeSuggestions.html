@@ -8,17 +8,19 @@
     <ul>
         <table style="width:100%">
           <tr>
+            <th>ID</th>
             <th>Greeter</th>
-            <th>Category</th>
             <th>Subject</th>
             <th>Description</th>
+            <th>Completed?</th>
           </tr>
         {% for suggestion in suggestions %}
             <tr>
+                <td><a href="/greeter/postSuggestion/{{suggestion.pk}}/">{{suggestion.pk}} </td>
                 <td>{{suggestion.greeterID}}</td>
-                <td>{{suggestion.category}} </td>
                 <td>{{suggestion.subject}} </td>
                 <td>{{suggestion.description}} </td>
+                <td><a href="/greeter/viewSuggestions/markComplete/{{suggestion.pk}}/">{{suggestion.flag}} </td>
             </tr>
         {% endfor %}
         </table>

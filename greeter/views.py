@@ -240,15 +240,7 @@ def postSuggestion(request):
         form = SuggestionForm(request.POST)
         print form
         if form.is_valid():
-            mySuggestion = form.save(commit=False)
-            print "my premade category is:", mySuggestion.category
-            if mySuggestion.category is None:
-                mySuggestion.save()
-                form.save()
-            else:
-                mySuggestion.category = form.cleaned_data['add_category']
-                mySuggestion.save()
-                form.save()
+            mySuggestion = form.save(commit=True)
             return HttpResponseRedirect('/greeter/viewSuggestions/')
             
         else:
@@ -257,5 +249,26 @@ def postSuggestion(request):
         curTrainerID = greeterID.objects.get(user_id=request.user.pk)
         form = SuggestionForm(initial={'greeterID': curTrainerID.pk})
     return render_to_response('greeter/GiveSuggestion.html',{'form': form}, context)
-        
+def modifySuggestion(request, suggestionID):
+    context = RequestContext(request)
+    mySuggestion = suggestion.objects.get(pk=suggestionID)
+    if request.method == 'POST':
+        form = SuggestionForm(request.POST, instance=mySuggestion)
+        print form
+        if form.is_valid():
+            mySuggestion = form.save(commit=True)
+            return HttpResponseRedirect('/greeter/viewSuggestions/')
+            
+        else:
+            print form.errors
+    else:
+        curTrainerID = greeterID.objects.get(user_id=request.user.pk)
+        form = SuggestionForm(initial={'category' : mySuggestion.category},instance=mySuggestion)
+    return render_to_response('greeter/GiveSuggestion.html',{'form': form, 'mySuggestion':mySuggestion}, context)
+def markComplete(request, suggestionID):
+    context = RequestContext(request)
+    mySuggestion = suggestion.objects.get(pk=suggestionID)
+    mySuggestion.flag = not mySuggestion.flag
+    mySuggestion.save()
+    return HttpResponseRedirect('/greeter/viewSuggestions/')
         

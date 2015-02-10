@@ -66,16 +66,8 @@ class QuizForm(forms.Form):
     Answer = forms.CharField(widget=forms.HiddenInput)
 
 class SuggestionForm(forms.ModelForm):
-    # def __init__(self, *args, **kwargs):
-        # greeter = kwargs.setdefault('greeter',())
-        # greeter = kwargs.pop('greeter')
-        # super(SuggestionForm, self).__init__(*args, **kwargs)
-        # self.fields['greeterID'] = greeter
-    category = forms.ModelMultipleChoiceField(queryset = suggestion.objects.all().values_list('category', flat=True), required=False)
-    add_category = forms.CharField(max_length = 500,  required=False)
-    #greeterID = forms.IntegerField(widget=forms.HiddenInput())
-    
+
     class Meta:
         model = suggestion
-        fields = ('category','add_category','subject', 'description', 'greeterID')
+        fields = ('subject', 'description', 'greeterID')
 

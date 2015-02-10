@@ -18,5 +18,7 @@ urlpatterns = patterns('',
     url(r'^quiz/$',views.quiz, name='quiz'),
     url(r'^postSuggestion/$',views.postSuggestion, name='postSuggestion'),
     url(r'^viewSuggestions/$',views.viewSuggestions, name='viewSuggestions'),
+    url(r'^viewSuggestions/markComplete/(?P<suggestionID>\w+)/$',views.markComplete, name='markComplete'),
+    url(r'^postSuggestion/(?P<suggestionID>\w+)/$',views.modifySuggestion, name='modifySuggestion'),
     
 )   

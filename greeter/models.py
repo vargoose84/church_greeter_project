@@ -7,7 +7,7 @@ class suggestion(models.Model):
     category = models.CharField(max_length=128)
     subject = models.CharField(max_length = 500)
     description = models.TextField()
-    
+    flag = models.BooleanField(default=False)
 class greeterRecord(models.Model):
     trainerID = models.ForeignKey('greeterID')
     churchGoer = models.ForeignKey('churchGoer')
