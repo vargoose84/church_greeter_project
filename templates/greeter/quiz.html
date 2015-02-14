@@ -5,7 +5,7 @@
  <div class="hero-unit">
         <h1>{{ message}} {% if incorrectAnswer %} <a href="/greeter/getChurch/{{incorrectAnswer.pk}}/">{{incorrectAnswer}}</a> {% endif%}</h1>
         {% if goer.picture %}
-            <img src="{{ MEDIA_URL}}{{goer.picture}}" alt="Profile Picture" /><br/>
+            <img src="{{ MEDIA_URL}}{{goer.picture}}" class="img-pp" alt="Profile Picture" /><br/>
             {% endif%}
 
 <!--{% for id in population %}

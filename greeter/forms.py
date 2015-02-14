@@ -62,6 +62,7 @@ class QuizForm(forms.Form):
         extra = kwargs.pop('extra')
         super(QuizForm, self).__init__(*args, **kwargs)
         self.fields['population'] = forms.MultipleChoiceField(choices=extra, widget=forms.RadioSelect)
+        self.fields['population'].label = 'Who am I?'
     population = forms.MultipleChoiceField()
     Answer = forms.CharField(widget=forms.HiddenInput)
 
